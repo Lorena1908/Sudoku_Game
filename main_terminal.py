@@ -6,6 +6,7 @@ def print_board(board):
 
 
 def board_full(board):
+    # Check if the board is full
     for line in range(len(board)):
         for column in range(len(board[0])):
             if board[line][column] == 0:
@@ -14,6 +15,7 @@ def board_full(board):
 
 
 def check_squares(board, line_pos, col_pos, line_offset, col_offset):
+    # Check for equal numbers in the same square
     for line in range(3):
         line += line_offset
         
@@ -39,6 +41,7 @@ def check_line_and_col(board, line_pos, col_pos):
 
 
 def generate_offset(line, col):
+    # Generate the line and column offsets for the check_squares() function
     if 0 <= line <= 2:
         line_offset = 0
     elif 3 <= line <= 5:
@@ -67,13 +70,15 @@ def check_winning(board):
 
 
 def create_board(rows, columns, total_num):
+    # Creates a board with total_num amount of random numbers. The random 
+    # numbers must not have an equal one in the same line, column or square
     board = [[0 for _ in range(rows)] for _ in range(columns)]
 
     num = 0
     while num < total_num:
         line = random.randrange(1, rows)
         col = random.randrange(1, rows)
-        num_board = random.randrange(1, rows)
+        num_board = random.randrange(1, rows+1)
         line_offset, col_offset = generate_offset(line, col)
         
         num += 1
@@ -83,15 +88,14 @@ def create_board(rows, columns, total_num):
         if not(check_line_and_col(board, line, col)) or not(check_squares(board, line, col, line_offset, col_offset)):
             num -= 1
             board[line][col] = 0
-            continue   
     return board
 
 
 def main():
+    # Main function of the game
     rows = 9
     board = create_board(rows, rows, 18)
     run = True
-    won = True
     print_board(board)
 
     # Main game loop
@@ -111,12 +115,13 @@ def main():
 
         print_board(board)
 
+        # Check if the board is full and if the player won
         if board_full(board):
-            won = check_winning(board)
-            if won:
+            if check_winning(board):
                 print("WON")
             else:
                 print("LOST")
             break
-    
-main()
+
+if __name__ == '__main__':
+    main()
