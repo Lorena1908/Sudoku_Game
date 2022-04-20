@@ -1,6 +1,3 @@
-from ctypes import sizeof
-
-
 def create_board(rows, columns):
     return [[0 for _ in range(rows)] for _ in range(columns)]
 
