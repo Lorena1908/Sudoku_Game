@@ -78,16 +78,20 @@ def create_board(rows, columns, total_num):
     while num < total_num:
         line = random.randrange(1, rows)
         col = random.randrange(1, rows)
+
+        if board[line][col] != 0:
+            continue
+
         num_board = random.randrange(1, rows+1)
         line_offset, col_offset = generate_offset(line, col)
-        
-        num += 1
 
         board[line][col] = num_board
 
         if not(check_line_and_col(board, line, col)) or not(check_squares(board, line, col, line_offset, col_offset)):
-            num -= 1
             board[line][col] = 0
+            continue
+
+        num += 1
     return board
 
 
