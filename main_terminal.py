@@ -76,8 +76,8 @@ def create_board(rows, columns, total_num):
 
     num = 0
     while num < total_num:
-        line = random.randrange(1, rows)
-        col = random.randrange(1, rows)
+        line = random.randrange(rows)
+        col = random.randrange(rows)
 
         if board[line][col] != 0:
             continue
@@ -115,7 +115,10 @@ def main():
         num = int(input("Enter a number: "))
 
         # Add the number to the board
-        board[line-1][col-1] = num
+        if board[line-1][col-1] == 0:
+            board[line-1][col-1] = num
+        else:
+            print("Invalid Position")
 
         print_board(board)
 
