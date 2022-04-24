@@ -1,4 +1,4 @@
-from random import *
+from random import randrange, shuffle
 import copy
 
 # These three functions: create_board_and_solution, generate_not_solved_board and 
