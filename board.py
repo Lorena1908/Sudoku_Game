@@ -11,11 +11,11 @@ class Board:
         self.counter = 0
         self.numbers = [1,2,3,4,5,6,7,8,9]
         self.attempts = 5 # To increase the dificulty increse the attempts number
-        self.grid, self.solution = self.create_board_and_solution()
+        self.numbers, self.solution = self.create_board_and_solution()
     
     def print_board(self):
-        for line in range(len(self.grid)):
-            print(self.grid[line])
+        for line in range(len(self.numbers)):
+            print(self.numbers[line])
 
     def board_full(self, board):
         # Check if the board is full
@@ -92,9 +92,9 @@ class Board:
         return True 
 
     def check_winning(self):
-        for line in range(len(self.grid)):
-            for col in range(len(self.grid[line])):
-                if self.grid[line][col] != self.solution[line][col]:
+        for line in range(len(self.numbers)):
+            for col in range(len(self.numbers[line])):
+                if self.numbers[line][col] != self.solution[line][col]:
                     return False
         return True
 
