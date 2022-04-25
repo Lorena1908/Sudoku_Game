@@ -96,40 +96,53 @@ def draw_window(surface, board, square, width, pos, buttons):
     pygame.display.update()
 
 
+def draw_end_screen(won, surface, width, height):
+    font = pygame.font.SysFont('comicsans', 70)
+    if won:
+        text = font.render("You Won!", 1, (255,0,0))
+    else:
+        text = font.render("You Lost!", 1, (255,0,0))
+    surface.blit(text, (width/2-text.get_width()/2, height/2-text.get_height()/2))
+    pygame.display.update()
+
+
 def main():
     # Window settings
-    width = 600
-    window = pygame.display.set_mode((width+280, width))
+    grid_width = 600
+    screen_width = grid_width+280
+    window = pygame.display.set_mode((screen_width, grid_width))
     pygame.display.set_caption("Sudoku Game")
 
     # Variables
     rows = 9
     run = True
     board = Board(rows, rows)
-    square = ColoredSquare(rows, width, (200, 203, 255), (101, 110, 255), window, board.numbers)
+    square = ColoredSquare(rows, grid_width, (200, 203, 255), (101, 110, 255), window, board.numbers)
     pos = (0, 0) # Position of the mouse when a button is clicked
 
     buttons = [
-        Button(width+50, width/2-90, 50, 50, (255,0,255), "1", window),
-        Button(width+115, width/2-90, 50, 50, (255,0,255), "2", window),
-        Button(width+180, width/2-90, 50, 50, (255,0,255), "3", window),
-        Button(width+50, width/2-25, 50, 50, (255,0,255), "4", window),
-        Button(width+115, width/2-25, 50, 50, (255,0,255), "5", window),
-        Button(width+180, width/2-25, 50, 50, (255,0,255), "6", window),
-        Button(width+50, width/2+40, 50, 50, (255,0,255), "7", window),
-        Button(width+115, width/2+40, 50, 50, (255,0,255), "8", window),
-        Button(width+180, width/2+40, 50, 50, (255,0,255), "9", window),
+        Button(grid_width+50, grid_width/2-90, 50, 50, (255,0,255), "1", window),
+        Button(grid_width+115, grid_width/2-90, 50, 50, (255,0,255), "2", window),
+        Button(grid_width+180, grid_width/2-90, 50, 50, (255,0,255), "3", window),
+        Button(grid_width+50, grid_width/2-25, 50, 50, (255,0,255), "4", window),
+        Button(grid_width+115, grid_width/2-25, 50, 50, (255,0,255), "5", window),
+        Button(grid_width+180, grid_width/2-25, 50, 50, (255,0,255), "6", window),
+        Button(grid_width+50, grid_width/2+40, 50, 50, (255,0,255), "7", window),
+        Button(grid_width+115, grid_width/2+40, 50, 50, (255,0,255), "8", window),
+        Button(grid_width+180, grid_width/2+40, 50, 50, (255,0,255), "9", window),
     ]
+    won = False
 
     while run:
-        draw_window(window, board, square, width, pos, buttons)
+        draw_window(window, board, square, grid_width, pos, buttons)
 
         # Check if the board is full and if the player won
         if board.board_full(board.numbers):
             if board.check_winning():
-                print("WON!")
+                won = True
             else:
-                print("LOST!")
+                won = False
+            draw_end_screen(won, window, screen_width, grid_width)
             run = False
 
         for event in pygame.event.get():
@@ -143,5 +156,8 @@ def main():
                 for btn in buttons:
                     if btn.clicked(pos[0], pos[1]):
                         board.numbers[square.line][square.col] = int(btn.text)
+        
+        if not run:
+            pygame.time.wait(3000)
 
 main()
