@@ -3,19 +3,16 @@ from board import Board
 pygame.font.init()
 
 class ColoredSquare:
-    def __init__(self, rows, width, color, surface, board):
-        self.color = color
-        self.x_hover = 0
-        self.y_hover = 0
-        self.x_click = 0
-        self.y_click = 0
+    def __init__(self, rows, width, color_hover, color_click, surface, board):
+        self.color_hover = color_hover
+        self.color_click = color_click
         self.rows = rows
         self.width = width / self.rows
         self.surface = surface
         self.board = board
-
+    
     def draw(self, x_click, y_click):
-        self.x_hover, self.y_hover = pygame.mouse.get_pos()
+        x_hover, y_hover = pygame.mouse.get_pos()
 
         # Draw blue squares when the mouse is hovered over a number or blank square
         for line in range(self.rows):
@@ -23,11 +20,13 @@ class ColoredSquare:
                 sq_x = col * self.width + 2
                 sq_y = line * self.width + 2
                 
-                if sq_x < self.x_hover < sq_x + self.width and sq_y < self.y_hover < sq_y + self.width:
-                    pygame.draw.rect(self.surface, self.color, (sq_x, sq_y, self.width-2, self.width-2))
+                if sq_x < x_hover < sq_x + self.width and sq_y < y_hover < sq_y + self.width:
+                    pygame.draw.rect(self.surface, self.color_hover, (sq_x, sq_y, self.width-2, self.width-2))
                 
                 if sq_x < x_click < sq_x + self.width and sq_y < y_click < sq_y + self.width and self.board[line][col] == 0:
-                    pygame.draw.rect(self.surface, self.color, (sq_x, sq_y, self.width-2, self.width-2))
+                    pygame.draw.rect(self.surface, self.color_click, (sq_x, sq_y, self.width-2, self.width-2))
+                    self.line = line
+                    self.col = col
 
 
 class Button:
@@ -44,12 +43,13 @@ class Button:
 
     def draw(self):
         self.label = self.font.render(self.text, 1, self.text_color)
-        pygame.draw.rect(self.surface, self.color, (self.x, self.y, self.width, self.height))
+        pygame.draw.rect(self.surface, self.color, (self.x, self.y, self.width, self.height), 0, 15)
         self.surface.blit(self.label, (self.x + self.width/2 - self.label.get_width()/2, self.y + self.height/2 - self.label.get_height()/2))
     
-    def action(self, x_clicked, y_clicked):
+    def clicked(self, x_clicked, y_clicked):
         if self.x < x_clicked < self.x + self.width and self.y < y_clicked < self.y + self.height:
-            print("Action")
+            return True
+        return False
 
 def draw_grid(width, rows, surface, board_nums):
     square_width = width / rows
@@ -85,38 +85,52 @@ def draw_grid(width, rows, surface, board_nums):
                 surface.blit(text, (square_width/2 + col * square_width - text.get_width()/2, square_width/2 + line * square_width - text.get_height()/2))
 
 
-def draw_window(surface, board, square, width, pos, btn):
+def draw_window(surface, board, square, width, pos, buttons):
     surface.fill((255,255,255))
     square.draw(pos[0], pos[1])
     draw_grid(width, board.rows, surface, board.numbers)
-    btn.draw()
+    
+    for btn in buttons:
+        btn.draw()
+    
     pygame.display.update()
 
 
 def main():
     # Window settings
     width = 600
-    window = pygame.display.set_mode((width+300, width))
+    window = pygame.display.set_mode((width+280, width))
     pygame.display.set_caption("Sudoku Game")
 
     # Variables
     rows = 9
     run = True
     board = Board(rows, rows)
-    square = ColoredSquare(rows, width, (0,255,255), window, board.numbers)
-    btn = Button(width+100, width/2-25, 100, 50, (255,0,255), "Number", window)
+    square = ColoredSquare(rows, width, (200, 203, 255), (101, 110, 255), window, board.numbers)
     pos = (0, 0) # Position of the mouse when a button is clicked
 
+    buttons = [
+        Button(width+50, width/2-90, 50, 50, (255,0,255), "1", window),
+        Button(width+115, width/2-90, 50, 50, (255,0,255), "2", window),
+        Button(width+180, width/2-90, 50, 50, (255,0,255), "3", window),
+        Button(width+50, width/2-25, 50, 50, (255,0,255), "4", window),
+        Button(width+115, width/2-25, 50, 50, (255,0,255), "5", window),
+        Button(width+180, width/2-25, 50, 50, (255,0,255), "6", window),
+        Button(width+50, width/2+40, 50, 50, (255,0,255), "7", window),
+        Button(width+115, width/2+40, 50, 50, (255,0,255), "8", window),
+        Button(width+180, width/2+40, 50, 50, (255,0,255), "9", window),
+    ]
+
     while run:
-        draw_window(window, board, square, width, pos, btn)
+        draw_window(window, board, square, width, pos, buttons)
 
         # Check if the board is full and if the player won
-        # if board.board_full(board.grid):
-        #     if board.check_winning():
-        #         print("WON!")
-        #     else:
-        #         print("LOST!")
-        #     run = False
+        if board.board_full(board.numbers):
+            if board.check_winning():
+                print("WON!")
+            else:
+                print("LOST!")
+            run = False
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -125,6 +139,9 @@ def main():
             
             if event.type == pygame.MOUSEBUTTONDOWN:
                 pos = event.pos
-                btn.action(pos[0], pos[1])
+                
+                for btn in buttons:
+                    if btn.clicked(pos[0], pos[1]):
+                        board.numbers[square.line][square.col] = int(btn.text)
 
 main()
