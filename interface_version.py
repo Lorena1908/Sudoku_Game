@@ -1,10 +1,10 @@
 import pygame
-from main_terminal import create_board
+from board import Board
 pygame.font.init()
 
 width = 600
 window = pygame.display.set_mode((width, width))
-pygame.display.set_caption("Sudoku")
+pygame.display.set_caption("Sudoku Game")
 
 def draw_grid(width, rows, surface):
     line_width1 = width / rows
@@ -37,23 +37,31 @@ def draw_board_num(board, surface, rows):
         for col in range(len(board[line])):
             if board[line][col] != 0:
                 text = font.render(f'{board[line][col]}', 1, (0,0,0))
-                surface.blit(text, (sq_width/2 + line * sq_width - text.get_width()/2, sq_width/2 + col * sq_width - text.get_height()/2))
+                surface.blit(text, (sq_width/2 + col * sq_width - text.get_width()/2, sq_width/2 + line * sq_width - text.get_height()/2))
 
 
-def draw_window(surface, rows, board):
+def draw_window(surface, board):
     surface.fill((255,255,255))
-    draw_grid(width, rows, surface)
-    draw_board_num(board, surface, rows)
+    draw_grid(width, board.rows, surface)
+    draw_board_num(board.grid, surface, board.rows)
     pygame.display.update()
+
 
 def main():
     run = True
-    rows = 9
-    board = create_board(rows, rows, 18)
+    board = Board(9,9)
 
     while run:
-        draw_window(window, rows, board)
-        
+        draw_window(window, board)
+
+        # Check if the board is full and if the player won
+        # if board.board_full(board.grid):
+        #     if board.check_winning():
+        #         print("WON!")
+        #     else:
+        #         print("LOST!")
+        #     run = False
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
