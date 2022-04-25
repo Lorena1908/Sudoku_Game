@@ -1,15 +1,19 @@
+from tkinter.messagebox import NO
 import pygame
 from board import Board
 pygame.font.init()
 
 class ColoredSquare:
-    def __init__(self, rows, width, color_hover, color_click, surface, board):
+    def __init__(self, rows, width, color_hover, color_click, surface, board, copy_board):
         self.color_hover = color_hover
         self.color_click = color_click
         self.rows = rows
         self.width = width / self.rows
         self.surface = surface
         self.board = board
+        self.copy_board = copy_board
+        self.line = -1
+        self.col = -1
     
     def draw(self, x_click, y_click):
         x_hover, y_hover = pygame.mouse.get_pos()
@@ -23,7 +27,7 @@ class ColoredSquare:
                 if sq_x < x_hover < sq_x + self.width and sq_y < y_hover < sq_y + self.width:
                     pygame.draw.rect(self.surface, self.color_hover, (sq_x, sq_y, self.width-2, self.width-2))
                 
-                if sq_x < x_click < sq_x + self.width and sq_y < y_click < sq_y + self.width and self.board[line][col] == 0:
+                if sq_x < x_click < sq_x + self.width and sq_y < y_click < sq_y + self.width and self.copy_board[line][col] == 0:
                     pygame.draw.rect(self.surface, self.color_click, (sq_x, sq_y, self.width-2, self.width-2))
                     self.line = line
                     self.col = col
@@ -51,7 +55,7 @@ class Button:
             return True
         return False
 
-def draw_grid(width, rows, surface, board_nums):
+def draw_grid(width, rows, surface, board_nums, copy_board_nums):
     square_width = width / rows
     quadrant_width = width / (rows//3)
     thickness = 4
@@ -83,12 +87,16 @@ def draw_grid(width, rows, surface, board_nums):
             if board_nums[line][col] != 0:
                 text = font.render(f'{board_nums[line][col]}', 1, (0,0,0))
                 surface.blit(text, (square_width/2 + col * square_width - text.get_width()/2, square_width/2 + line * square_width - text.get_height()/2))
-
+            
+            if copy_board_nums[line][col] != 0:
+                text = font.render(f'{copy_board_nums[line][col]}', 1, (0,0,255))
+                surface.blit(text, (square_width/2 + col * square_width - text.get_width()/2, square_width/2 + line * square_width - text.get_height()/2))
+    
 
 def draw_window(surface, board, square, width, pos, buttons):
     surface.fill((255,255,255))
     square.draw(pos[0], pos[1])
-    draw_grid(width, board.rows, surface, board.numbers)
+    draw_grid(width, board.rows, surface, board.numbers, board.copy)
     
     for btn in buttons:
         btn.draw()
@@ -117,10 +125,10 @@ def main():
     rows = 9
     run = True
     board = Board(rows, rows)
-    square = ColoredSquare(rows, grid_width, (200, 203, 255), (101, 110, 255), window, board.numbers)
+    square = ColoredSquare(rows, grid_width, (200, 203, 255), (101, 110, 255), window, board.numbers, board.copy)
     pos = (0, 0) # Position of the mouse when a button is clicked
 
-    buttons = [
+    num_buttons = [
         Button(grid_width+50, grid_width/2-90, 50, 50, (255,0,255), "1", window),
         Button(grid_width+115, grid_width/2-90, 50, 50, (255,0,255), "2", window),
         Button(grid_width+180, grid_width/2-90, 50, 50, (255,0,255), "3", window),
@@ -130,11 +138,12 @@ def main():
         Button(grid_width+50, grid_width/2+40, 50, 50, (255,0,255), "7", window),
         Button(grid_width+115, grid_width/2+40, 50, 50, (255,0,255), "8", window),
         Button(grid_width+180, grid_width/2+40, 50, 50, (255,0,255), "9", window),
+        Button(grid_width+90, grid_width/2+105, 100, 50, (255,0,255), "Delete", window),
     ]
     won = False
 
     while run:
-        draw_window(window, board, square, grid_width, pos, buttons)
+        draw_window(window, board, square, grid_width, pos, num_buttons)
 
         # Check if the board is full and if the player won
         if board.board_full(board.numbers):
@@ -153,9 +162,15 @@ def main():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 pos = event.pos
                 
-                for btn in buttons:
-                    if btn.clicked(pos[0], pos[1]):
-                        board.numbers[square.line][square.col] = int(btn.text)
+                for i, btn in enumerate(num_buttons):
+                    if btn.clicked(pos[0], pos[1]) and square.line != -1 and square.col != -1:
+                        if i == 9:
+                            board.numbers[square.line][square.col] = 0
+                        else:
+                            board.numbers[square.line][square.col] = int(btn.text)
+                        square.line = -1
+                        square.col = -1
+                        
         
         if not run:
             pygame.time.wait(3000)

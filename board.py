@@ -11,7 +11,7 @@ class Board:
         self.counter = 0
         self.numbers = [1,2,3,4,5,6,7,8,9]
         self.attempts = 5 # To increase the dificulty increse the attempts number
-        self.numbers, self.solution = self.create_board_and_solution()
+        self.numbers, self.solution, self.copy = self.create_board_and_solution()
     
     def print_board(self):
         for line in range(len(self.numbers)):
@@ -164,4 +164,6 @@ class Board:
                 board[line][col] = backup_value
                 self.attempts -= 1
         
-        return board, solution
+        copy_board = copy.deepcopy(board)
+
+        return board, solution, copy_board
